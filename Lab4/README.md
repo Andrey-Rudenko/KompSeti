@@ -6,71 +6,37 @@
 
 ## Файлы
 
-- [`common.h`](./common.h) — общий заголовок: порт, размер буфера, обёртки над сокетами Windows (Winsock2) и Linux (BSD sockets).
+- [`common.h`](./common.h) — обёртки над сокетами Windows (Winsock2) и Linux (BSD sockets).
 - [`server.c`](./server.c) — UDP-сервер.
 - [`client.c`](./client.c) — тестовый клиент.
-- [`domains.txt`](./domains.txt) — файл соответствия домен → IP.
+- [`domains.txt`](./domains.txt) — соответствие домен → IP.
 
-## Интерфейс взаимодействия
+## Интерфейс
 
-Простой текстовый протокол поверх UDP, порт **5354**.
-
-- Клиент отправляет UDP-пакет с доменным именем в виде обычной строки, например `yandex.ru`.
-- Сервер ищет домен в таблице, загруженной из `domains.txt`.
-  - Если найден — отвечает строкой с IP-адресом, например `5.255.255.60`.
-  - Если не найден — отвечает строкой `NOT_FOUND`.
-
-Формат `domains.txt`: на каждой строке `домен ip`, разделитель — пробел:
-
-```
-yandex.ru 5.255.255.60
-google.com 142.250.74.78
-mail.ru 217.69.139.200
-example.com 93.184.215.14
-```
+Текстовый протокол поверх UDP, порт 5354. Клиент отправляет домен строкой (`yandex.ru`), сервер отвечает IP-адресом (`5.255.255.60`) или `NOT_FOUND`.
 
 ## Сборка
 
-Linux:
-
 ```
-gcc -o server server.c
-gcc -o client client.c
+gcc -o server server.c                          # Linux
+gcc -o server.exe server.c -lws2_32              # Windows
 ```
-
-Windows (gcc/MinGW):
-
-```
-gcc -o server.exe server.c -lws2_32
-gcc -o client.exe client.c -lws2_32
-```
+(аналогично для `client.c`)
 
 ## Запуск
 
-Сервер запускается в папке, где лежит `domains.txt`:
-
 ```
 ./server
-```
-
-Клиент:
-
-```
 ./client <ip_сервера> <домен>
-# например
-./client 127.0.0.1 yandex.ru
 ```
 
 ## Проверка
 
-Сервер и клиент собраны и проверены и на Windows (gcc/MinGW), и на Linux (WSL Ubuntu, gcc):
+Собрано и проверено на Windows (gcc/MinGW) и на Linux (WSL Ubuntu, gcc):
 
 ```
 $ ./client 127.0.0.1 yandex.ru
 yandex.ru -> 5.255.255.60
-
-$ ./client 127.0.0.1 google.com
-google.com -> 142.250.74.78
 
 $ ./client 127.0.0.1 unknown.ru
 unknown.ru -> NOT_FOUND
